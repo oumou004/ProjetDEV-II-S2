@@ -86,3 +86,81 @@ class Quiz:
             self._finished = True
             return False
         return True
+    
+    def get_current_answer(self):
+        """Récupère les réponses associées à la question courante.
+
+        Retourne une liste de dictionnaires contenant `id`, `text`,
+        `is_correct` et `explanation`.
+        """
+        question = self.get_current_question()
+
+        if question is None:
+            return None
+
+        self._current_answers.clear()
+        for row in self._answer.get_answers_by_question(question["id"]):
+            answer ={
+                "id": row[0],
+                "text" : row[1],
+                "is_correct" : row[2],
+                "explanation" : row[3]
+            }
+
+            self._current_answers.append(answer)
+        return self._current_answers
+
+
+    def get_correct_answer(self):
+        """Retourne la réponse correcte pour la question courante, ou `None`."""
+        self.get_current_answer()
+
+        for correct_answer in self._current_answers:
+
+            if correct_answer["is_correct"]:
+                return correct_answer
+        return None
+
+    def user_answer(self, answer):
+        """Enregistre la réponse de l'utilisateur et met à jour le score.
+
+        Args:
+            answer (int): Identifiant de la réponse choisie par l'utilisateur.
+
+        Returns:
+            bool: True si la réponse est correcte, False sinon.
+        """
+        value = self.get_correct_answer()
+        if value is not None and answer == value["id"]:
+            self._score += 1
+            return True
+        return False
+
+    @property
+    def finished(self):
+        return self._finished
+
+    @finished.setter
+    def finished(self, value:bool):
+        self._finished = value
+
+    @property
+    def score(self):
+        return self._score
+
+    @score.setter
+    def score(self, value:int):
+        if value < 0:
+            raise ValueError("Score invalide")
+        self._score = value
+
+    @property
+    def total_questions(self):
+        return self._quiz
+    
+    
+
+
+if __name__ == "__main__":
+    pass
+ 
