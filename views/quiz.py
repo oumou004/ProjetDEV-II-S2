@@ -69,4 +69,7 @@ class QuizPage(tk.Frame):
             text=str(message)
         )
 
-    
+
+    def clear_form(self):
+        for widget in self.form_frame.winfo_children():
+            widget.destroy()
