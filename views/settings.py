@@ -36,3 +36,49 @@ class SettingsPage(tk.Frame):
             fill="both",
             expand=True
         )
+
+        self.title = tk.Label(
+            self.top_frame,
+            text="Bienvenue sur la page de reglages",
+            font=("Arial", 20)
+        )
+        self.title.pack(pady=20)
+
+        btn_menu = tk.Button(
+            self.top_frame,
+            text="[ MENU ]",
+            command=lambda:
+            controller.show_page("MenuPage")
+        )
+
+        btn_menu.pack()
+
+        self.info = tk.Label(
+            self.bottom_frame,
+            text=""
+        )
+
+        self.info.pack(pady=10)
+
+        btn_update_name = tk.Button(
+            self.center_frame,
+            text="[ Modifier le nom d'utilisateur ]",
+            command=self.update_username_form
+        )
+        btn_update_name.pack()
+
+        btn_update_passwd = tk.Button(
+            self.center_frame,
+            text="[ Modifier le mot de passe ]",
+            command=self.update_passwd_form
+        )
+        btn_update_passwd.pack()
+
+        btn_ = tk.Button(
+            self.center_frame,
+            text="[ ]",
+            command=""
+        )
+        btn_.pack()
+
+        
