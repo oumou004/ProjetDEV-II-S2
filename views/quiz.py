@@ -63,3 +63,10 @@ class QuizPage(tk.Frame):
             command=""
         )
         btn_.pack()
+
+    def show_message(self, message):
+        self.info.config(
+            text=str(message)
+        )
+
+    
