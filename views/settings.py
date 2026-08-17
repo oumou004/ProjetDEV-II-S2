@@ -134,8 +134,51 @@ class SettingsPage(tk.Frame):
             self.show_message(e)
             print(str(e))
             return
-     
 
+     
+    def update_passwd_form(self):
+        self.clear_form()
+        self.show_message("")
+
+        tk.Label(self.form_frame, text="Nom d'utilisateur").pack()
+        self.username = tk.Entry(self.form_frame)
+        self.username.pack()
+
+        tk.Label(self.form_frame, text="Mot de passe").pack()
+        self.password = tk.Entry(self.form_frame, show="*")
+        self.password.pack()
+
+        tk.Label(self.form_frame, text="Nouveau mot de passe").pack()
+        self.new_password = tk.Entry(self.form_frame, show="*")
+        self.new_password.pack()
+
+        tk.Button(
+            self.form_frame,
+            text="Valider",
+            command=self.update_passwd
+        ).pack()
+
+    def update_passwd(self):
+        username = self.username.get().strip()
+        passwd = self.password.get().strip()
+        new_passwd = self.new_password.get().strip()
+
+        if not re.match("^[a-zA-Z0-9]+$", username) :
+            self.show_message("Le nom d'utilisateur contient des caractères non autorisés")
+            return
+
+        try:
+
+            msg = self.controller.user.change_password(username, passwd, new_passwd)
+
+            self.show_message(msg)
+            self.clear_form()
+
+
+        except (DatabaseError, AuthenticationError, UserNotFoundError, TypeError, ValueError) as e:
+            self.show_message(e)
+            print(str(e))
+            return
 
 
 
