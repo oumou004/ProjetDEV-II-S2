@@ -89,4 +89,28 @@ class SettingsPage(tk.Frame):
     def clear_form(self):
         for widget in self.form_frame.winfo_children():
             widget.destroy()
-    
+
+
+    def update_username_form(self):
+        self.clear_form()
+        self.show_message("")
+
+        tk.Label(self.form_frame, text="Nom d'utilisateur").pack()
+        self.username = tk.Entry(self.form_frame)
+        self.username.pack()
+
+        tk.Label(self.form_frame, text="Nouveau nom d'utilisateur").pack()
+        self.new_username = tk.Entry(self.form_frame)
+        self.new_username.pack()
+
+        tk.Label(self.form_frame, text="Mot de passe").pack()
+        self.password = tk.Entry(self.form_frame, show="*")
+        self.password.pack()
+
+        tk.Button(
+            self.form_frame,
+            text="Valider",
+            command=self.update_username
+        ).pack()
+
+
