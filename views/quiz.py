@@ -33,3 +33,33 @@ class QuizPage(tk.Frame):
             fill="both",
             expand=True
         )
+
+        self.title = tk.Label(
+            self.top_frame,
+            text="Bienvenue sur la page de revision",
+            font=("Arial", 20)
+        )
+        self.title.pack(pady=20)
+
+        btn_menu = tk.Button(
+            self.top_frame,
+            text="[ MENU ]",
+            command=lambda:
+            controller.show_page("MenuPage")
+        )
+
+        btn_menu.pack()
+
+        self.info = tk.Label(
+            self.bottom_frame,
+            text=""
+        )
+
+        self.info.pack(pady=10)
+
+        btn_ = tk.Button(
+            self.center_frame,
+            text="[ ]",
+            command=""
+        )
+        btn_.pack()
