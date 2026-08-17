@@ -113,4 +113,29 @@ class SettingsPage(tk.Frame):
             command=self.update_username
         ).pack()
 
+    def update_username(self):
+        username = self.username.get().strip()
+        new_username = self.new_username.get().strip()
+        passwd = self.password.get().strip()
+
+        if not re.match("^[a-zA-Z0-9]+$", username) or not re.match("^[a-zA-Z0-9]+$", new_username):
+            self.show_message("Le nom d'utilisateur contient des caractères non autorisés")
+            return
+
+        try:
+
+            msg = self.controller.user.change_username(username, new_username, passwd)
+
+            self.show_message(msg)
+            self.clear_form()
+
+
+        except (DatabaseError, AuthenticationError, UserNotFoundError, TypeError, ValueError) as e:
+            self.show_message(e)
+            print(str(e))
+            return
+     
+
+
+
 
