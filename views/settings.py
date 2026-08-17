@@ -81,4 +81,12 @@ class SettingsPage(tk.Frame):
         )
         btn_.pack()
 
-        
+    def show_message(self, message):
+        self.info.config(
+            text=str(message)
+        )
+
+    def clear_form(self):
+        for widget in self.form_frame.winfo_children():
+            widget.destroy()
+    
