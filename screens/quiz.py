@@ -234,4 +234,28 @@ class QuizScreen(Screen):
             await self.next_question()
 
     
-    
+    async def start_game(self):
+
+        self.show_message("")
+
+        select = self.query_one("#sub_select", Select)
+
+        if not isinstance(select.value, str):
+            self.show_message("Veuillez sélectionner un sujet.")
+            return
+
+        self.query_one("#menu", Button).disabled = True
+
+        self.query_one("#sub_select").display = False
+        self.query_one("#start_game").display = False
+
+        subject_id = int(select.value)
+
+        try:
+
+            self.app.quiz.create_quiz(subject_id)
+            await self.display_question()
+
+        except DatabaseError as e:
+            self.show_message(e)
+            print(e)
