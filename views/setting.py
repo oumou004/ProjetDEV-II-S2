@@ -180,5 +180,67 @@ class SettingsPage(tk.Frame):
             print(str(e))
             return
 
+    def delete_user_form(self):
+        self.clear_form()
+        self.show_message("")
+
+        tk.Label(
+            self.form_frame,
+            text="Nom d'utilisateur",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=0, column=0, padx=5, pady=5, sticky="e")
+        self.username = tk.Entry(
+            self.form_frame,
+            width=30,
+            bg="#2B2B2B",
+            fg="white",
+            insertbackground="white"
+        )
+        self.username.grid(row=0, column=1, padx=5, pady=5, sticky="e")
+
+        tk.Label(
+            self.form_frame,
+            text="Mot de passe",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+        self.password = tk.Entry(
+            self.form_frame,
+            width=30,
+            bg="#2B2B2B",
+            fg="white",
+            insertbackground="white",
+            show="*"
+        )
+        self.password.grid(row=1, column=1, padx=5, pady=5, sticky="e")
+
+        tk.Button(
+            self.form_frame,
+            text="[ Supprimer ]",
+            width=25,
+            height=2,
+            bg="#00A86B",
+            fg="white",
+            font=("Arial", 11, "bold"),
+            command=self.delete_user
+        ).grid(row=2, column=0, columnspan=2, pady=15)
+
+    def delete_user(self):
+        username = self.username.get().strip()
+        passwd = self.password.get().strip()
+
+        try:
+
+            self.controller.user.delete_user(username, passwd)
+            self.show_message("Utilisateur supprimé avec succès")
+            self.clear_form()
+
+        except (DatabaseError, AuthenticationError, UserNotFoundError, TypeError, ValueError) as e:
+            self.show_message(e)
+            print(str(e))
+            return
 
 
