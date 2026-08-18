@@ -395,3 +395,114 @@ class SettingScreen(Screen):
 
         except DatabaseError as e:
             self.show_message(e)
+
+    async def rem_quest(self):
+
+        zone = self.query_one("#form_zone", Container)
+        await zone.remove_children()
+
+        status = self.app.status.get_status()
+        subjects = self.app.subject.get_subjects()
+
+        subject_options = []
+        status_options = []
+
+        for row in subjects:
+            subject_id = row[0]
+            subject_name = row[1]
+            subject_options.append((subject_name, str(subject_id)))
+
+        if not subject_options:
+            self.show_message("Aucun sujet disponible.")
+            return
+
+        for row in status:
+            status_id = row[0]
+            status_name = row[1]
+            status_options.append((status_name, str(status_id)))
+
+        if not status_options:
+            self.show_message("Aucun statut disponible.")
+            return
+
+        await zone.mount(Label("Sujet :"))
+        await zone.mount(Select(subject_options, id="quest_sub_choise"))
+
+        await zone.mount(Label("Statut :"))
+        await zone.mount(Select(status_options, id="quest_stat_choise"))
+
+        await zone.mount(Button("Afficher", id="rem_quest_action"))
+        
+
+    
+    async def rem_quest_action(self):
+        self.show_message("")
+
+        zone = self.query_one("#form_zone", Container)
+
+        if self.query("#question_list"):
+            await self.query_one("#question_list").remove()
+
+        select_subject = self.query_one("#quest_sub_choise", Select)
+        select_status = self.query_one("#quest_stat_choise", Select)
+
+        if not isinstance(select_subject.value, str) or not isinstance(select_status.value, str):
+            self.show_message("Veuillez d'abord sélectionner un sujet ou un statut.")
+            return
+
+        subject_id = int(select_subject.value)
+        status_id = int(select_status.value)
+
+        try:
+            await zone.mount(ListView(id="question_list"))
+
+            list_view = self.query_one("#question_list", ListView)
+
+            questions = self.app.question.get_questions_sub_stat(subject_id, status_id)
+
+            if not questions:
+                self.show_message("Aucune question trouvée.")
+                return
+
+            for row in questions:
+                item = ListItem(Label(row[1]), id=f"question_{row[0]}")
+
+                await list_view.mount(item)
+
+            list_view.focus()
+
+            await zone.mount(Button("Supprimer", id="rem_quest_sup"))
+        except DatabaseError as e:
+            self.show_message(e)
+
+
+    async def rem_quest_sup(self):
+        list_view = self.query_one("#question_list", ListView)
+
+        selected = list_view.highlighted_child
+
+        if selected is None:
+            self.show_message(
+                "Veuillez sélectionner une question."
+            )
+            return
+
+        question_id = int(selected.id.replace("question_", ""))
+
+        try:
+            self.app.question.remove_question(question_id)
+
+            self.show_message(
+                "Question supprimée avec succès."
+            )
+
+            zone = self.query_one("#form_zone", Container)
+            await zone.remove_children()
+
+        except DatabaseError as e:
+            self.show_message(e)
+
+
+
+    def show_message(self, message):
+        self.query_one("#message").update(str(message))
