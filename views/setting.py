@@ -243,4 +243,178 @@ class SettingsPage(tk.Frame):
             print(str(e))
             return
 
+    def add_subject_form(self):
+        self.clear_form()
+        self.show_message("")
+
+
+        tk.Label(
+            self.form_frame,
+            text="Nom du sujet",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=0, column=0, padx=5, pady=5, sticky="e")
+        self.subject_name = tk.Entry(
+            self.form_frame,
+            width=30,
+            bg="#2B2B2B",
+            fg="white",
+            insertbackground="white"
+        )
+        self.subject_name.grid(row=0, column=1, padx=5, pady=5, sticky="e")
+
+        tk.Button(
+            self.form_frame,
+            text="[ Ajouter ]",
+            width=25,
+            height=2,
+            bg="#00A86B",
+            fg="white",
+            font=("Arial", 11, "bold"),
+            command=self.add_subject
+        ).grid(row=2, column=0, columnspan=2, pady=15)
+
+
+    def add_subject(self):
+        name = self.subject_name.get().strip()
+
+        try:
+
+            self.controller.subject.add_subject(name)
+            self.show_message("Sujet ajouté avec succès")
+            self.clear_form()
+
+        except DatabaseError as e:
+            self.show_message(e)
+            print(str(e))
+            return
+
+
+
+    def update_subject_form(self):
+        self.clear_form()
+        self.show_message("")
+
+        tk.Label(
+            self.form_frame,
+            text="Nom du sujet",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=0, column=0, padx=5, pady=5, sticky="e")
+
+        subjects = self.controller.subject.get_subjects()
+
+        self.subjects = subjects
+
+        values = [row[1] for row in subjects]
+
+        self.combo = ttk.Combobox(
+            self.form_frame,
+            values=values,
+            state="readonly"
+        )
+        self.combo.grid(row=0, column=1, padx=5, pady=5, sticky="e")
+
+        tk.Label(
+            self.form_frame,
+            text="Nouveau nom du sujet",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+        self.subject_name = tk.Entry(
+            self.form_frame,
+            width=30,
+            bg="#2B2B2B",
+            fg="white",
+            insertbackground="white"
+        )
+        self.subject_name.grid(row=1, column=1, padx=5, pady=5, sticky="e")
+
+        tk.Button(
+            self.form_frame,
+            text="[ Valider ]",
+            width=25,
+            height=2,
+            bg="#00A86B",
+            fg="white",
+            font=("Arial", 11, "bold"),
+            command=self.update_subject
+        ).grid(row=2, column=0, columnspan=2, pady=15)
+
+    def update_subject(self):
+        selected = self.combo.current()  # indice sélectionné
+
+        if selected == -1:
+            self.show_message("Sélectionnez un sujet.")
+            return
+
+        try:
+            subject_id = self.subjects[selected][0]
+            new_name = self.subject_name.get().strip()
+
+            self.controller.subject.edit_subject(subject_id, new_name)
+            self.show_message("")
+            self.clear_form()
+        except DatabaseError as e:
+            self.show_message(e)
+            print(str(e))
+            return
+
+    def delete_subject_form(self):
+        self.clear_form()
+        self.show_message("")
+
+        tk.Label(
+            self.form_frame,
+            text="Nom du sujet",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=0, column=0, padx=5, pady=5, sticky="e")
+
+        subjects = self.controller.subject.get_subjects()
+
+        self.subjects = subjects
+
+        values = [row[1] for row in subjects]
+
+        self.combo = ttk.Combobox(
+            self.form_frame,
+            values=values,
+            state="readonly"
+        )
+        self.combo.grid(row=0, column=1, padx=5, pady=5, sticky="e")
+
+        tk.Button(
+            self.form_frame,
+            text="[ Supprimer ]",
+            width=25,
+            height=2,
+            bg="#00A86B",
+            fg="white",
+            font=("Arial", 11, "bold"),
+            command=self.delete_subject
+        ).grid(row=2, column=0, columnspan=2, pady=15)
+
+
+    def delete_subject(self):
+        selected = self.combo.current()  # indice sélectionné
+
+        if selected == -1:
+            self.show_message("Sélectionnez un sujet.")
+            return
+
+        try:
+            subject_id = self.subjects[selected][0]
+
+            self.controller.subject.remove_subject(subject_id)
+            self.clear_form()
+        except DatabaseError as e:
+            self.show_message(e)
+            print(str(e))
+            return
+
 
