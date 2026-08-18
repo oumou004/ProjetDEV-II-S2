@@ -247,3 +247,22 @@ class LoginPage(tk.Frame):
             font=("Arial", 11, "bold"),
             command=self.create_user
         ).grid(row=2, column=0, columnspan=2, pady=15)
+        
+    def create_user(self):
+        username = self.username.get().strip()
+        passwd = self.password.get().strip()
+
+        if not re.match("^[a-zA-Z0-9]+$", username):
+            self.show_message("Le nom d'utilisateur contient des caractères non autorisés")
+            return
+
+        try:
+
+            self.controller.user.add_user(username, passwd)
+            self.show_message("Utilisateur créé avec succès")
+            self.clear_form()
+
+        except (DatabaseError, AuthenticationError, UserNotFoundError, TypeError, ValueError) as e:
+            self.show_message(e)
+            print(str(e))
+            return
