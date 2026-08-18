@@ -199,4 +199,25 @@ class LoginScreen(Screen):
 
         username.focus()
 
-        
+    def on_mount(self):
+        self.update_status()
+
+    def update_status(self):
+        label = self.query_one("#status")
+
+        if self.app.session.current_user is None:
+            label.update(
+                """
+                ═══════════════════════════════
+                Utilisateur : Aucun
+                Statut      : Déconnecté
+                ═══════════════════════════════
+                """)
+        else:
+            label.update(
+                f"""
+                ═══════════════════════════════
+                Utilisateur : {self.app.session.current_user}
+                Statut      : Connecté
+                ═══════════════════════════════
+                """)    
