@@ -357,3 +357,41 @@ class SettingScreen(Screen):
         except DatabaseError as e:
             self.show_message(e)
             print(e)
+            
+    async def save_answers(self):
+
+        get_answer = lambda i: (
+            self.query_one(f"#ans{i}").value.strip(),
+            self.query_one(f"#ans{i}_ok", Checkbox).value
+        )
+
+        answers = [
+            get_answer(1),
+            get_answer(2),
+            get_answer(3)
+        ]
+
+        correct_count = sum(1 for text, correct in answers if correct)
+
+        if correct_count != 1:
+            self.show_message("Il doit y avoir exactement une réponse correcte.")
+            return
+
+        explanation = self.query_one("#explication").value.strip()
+
+        try:
+            for text, correct in answers:
+                self.app.answer.add_answer(
+                    self.current_question_id,
+                    text,
+                    correct,
+                    explanation if correct else ""
+                )
+
+            self.show_message("Réponses ajoutées avec succès.")
+
+            zone = self.query_one("#form_zone", Container)
+            await zone.remove_children()
+
+        except DatabaseError as e:
+            self.show_message(e)
