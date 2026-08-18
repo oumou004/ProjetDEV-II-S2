@@ -172,7 +172,43 @@ class SettingScreen(Screen):
         elif event.button.id == "rem_quest_sup":
             await self.rem_quest_sup()
             
-            
+        async def add_sub(self):
+        zone = self.query_one("#form_zone", Container)
+
+        await zone.remove_children()
+
+        await zone.mount(Input(placeholder="Nom du sujet",id="sub_txt"))
+        await zone.mount(Button("Ajouter",id="add_sub_action"))
+        await zone.mount(Label("---------------------------------------------------------------"))
+
+
+
+    async def add_sub_action(self):
+        self.show_message("")
+        name = self.query_one("#sub_txt").value.strip()
+
+        if not isinstance(name, str):
+            self.show_message("Les champs doivent contenir une chaîne de caractères")
+            return False
+
+        if name.strip() == "":
+            self.show_message("Les champs ne peuvent pas être vides")
+            return False
+
+        try:
+
+            self.app.subject.add_subject(name)
+            self.show_message(f"Creation du sujet {name}, réussie")
+
+            zone = self.query_one("#form_zone", Container)
+            await zone.remove_children()
+            return True
+
+        except DatabaseError as e:
+
+            self.show_message(e)
+            print(e)
+            return False        
             
             
             
