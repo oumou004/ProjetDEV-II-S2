@@ -136,3 +136,45 @@ class SettingScreen(Screen):
         yield Container(id="form_zone")
 
         yield Label("", id="message")
+        
+    
+    async def on_button_pressed(self, event):
+        if event.button.id == "menu":
+            self.app.push_screen("menu")
+
+        elif event.button.id == "add_sub":
+            await self.add_sub()
+
+        elif event.button.id == "rem_sub":
+            await self.rem_sub()
+
+        elif event.button.id == "add_quest":
+            await self.add_quest()
+
+        elif event.button.id == "save_answers":
+            await self.save_answers()
+
+        elif event.button.id == "rem_quest":
+            await self.rem_quest()
+
+        elif event.button.id == "add_sub_action":
+            await self.add_sub_action()
+
+        elif event.button.id == "rem_sub_action":
+            await self.rem_sub_action()
+
+        elif event.button.id == "add_quest_action":
+            await self.add_quest_action()
+
+        elif event.button.id == "rem_quest_action":
+            await self.rem_quest_action()
+
+        elif event.button.id == "rem_quest_sup":
+            await self.rem_quest_sup()
+            
+            
+            
+            
+            
+            
+            
