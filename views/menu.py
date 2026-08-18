@@ -71,3 +71,19 @@ class MenuPage(tk.Frame):
         self.info.pack(pady=10)
 
         self.update_message()
+        
+    def update_message(self):
+
+        if self.controller.session.is_connected:
+
+            username = self.controller.session.current_user
+
+            self.info.config(
+                text=f"Bonjour {username}, prêt pour votre révision ?"
+            )
+
+        else:
+
+            self.info.config(
+                text="Vous n'êtes pas connecté."
+            )
