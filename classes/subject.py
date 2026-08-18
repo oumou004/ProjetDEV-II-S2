@@ -1,119 +1,80 @@
 from classes.database_manager import DatabaseManager, transactional, DatabaseError
 
+class Subject(DatabaseManager):
+    """Gestion des sujets de questions.
 
-class Answer(DatabaseManager):
-    """Gestion des réponses liées aux questions.
-
-    Fournit des méthodes pour créer, éditer, supprimer et récupérer
-    les réponses stockées dans la table `Answers`.
+    CRUD basique pour la table `Subjects`.
     """
     def __init__(self):
         super().__init__()
 
-    
     @transactional
-    def add_answer(self, question_id:int, text:str, is_correct:bool=False, explanation:str=""):
-        """Ajoute une nouvelle réponse pour une question donnée.
+    def add_subject(self, text:str):
+        """Ajoute un nouveau sujet.
 
         Args:
-            question_id (int): Identifiant de la question.
-            text (str): Texte de la réponse.
-            is_correct (bool): Indique si la réponse est correcte.
-            explanation (str): Explication associée à la réponse.
+            text (str): Nom du sujet.
         """
+
+
+
         self.execute(
-        "INSERT INTO Answers (question_id, answer_text, is_correct, explanation) VALUES (?, ?, ?, ?)",
-    (question_id, text, is_correct, explanation)
+            "INSERT INTO Subjects (name) VALUES (?)",
+            (text,)
         )
 
 
-
     @transactional
-    def edit_text(self, ident:int, text:str):
-        """Modifie le texte d'une réponse existante.
+    def edit_subject(self, ident:int, text:str):
+        """Modifie le nom d'un sujet.
 
         Args:
-            ident (int): Identifiant de la réponse.
-            text (str): Nouveau texte.
+            ident (int): Identifiant du sujet.
+            text (str): Nouveau nom.
         """
         self.execute(
-        "UPDATE Answers SET answer_text = ? WHERE id = ?",
-    (text, ident)
-        )
-
-        if self.rowcount == 0:
-            raise DatabaseError("Réponse introuvable.")
-
-
-
-    @transactional
-    def edit_is_correct(self, ident:int, boolean:bool):
-        """Met à jour le drapeau `is_correct` d'une réponse.
-
-        Args:
-            ident (int): Identifiant de la réponse.
-            boolean (bool): Nouvelle valeur pour `is_correct`.
-        """
-        self.execute(
-        "UPDATE Answers SET is_correct = ? WHERE id = ?",
-            (boolean, ident)
+            "UPDATE Subjects SET name = ? WHERE id = ?",
+            (text, ident)
         )
 
         if self.rowcount == 0:
-            raise DatabaseError("Réponse introuvable.")
-
-
-
-    @transactional
-    def edit_explanation(self, ident:int, txt:str):
-        """Modifie l'explication d'une réponse.
-
-        Args:
-            ident (int): Identifiant de la réponse.
-            txt (str): Nouveau texte d'explication.
-        """
-        self.execute(
-            "UPDATE Answers SET explanation = ? WHERE id = ?",
-            (txt, ident)
-        )
-
-        if self.rowcount == 0:
-            raise DatabaseError("Réponse introuvable.")
-
+            raise DatabaseError("Sujet introuvable.")
 
 
     @transactional
-    def delete_answer(self, ident:int):
-        """Supprime une réponse par son identifiant.
+    def remove_subject(self, ident:int):
+        """Supprime un sujet par identifiant.
 
         Args:
-            ident (int): Identifiant de la réponse à supprimer.
+            ident (int): Identifiant du sujet.
         """
         self.execute(
-        "DELETE FROM Answers WHERE id = ?",
-    (ident,)
+            "DELETE FROM Subjects WHERE id = ?",
+            (ident,)
         )
 
         if self.rowcount == 0:
-            raise DatabaseError("Réponse introuvable.")
-        
+            raise DatabaseError("Sujet introuvable.")
 
-    
-    def get_answers_by_question(self, question_id:int):
-        """Récupère toutes les réponses d'une question.
 
-        Args:
-            question_id (int): Identifiant de la question.
 
-        Returns:
-            list: Liste de tuples (id, answers_text, is_correct, explanation).
-        """
+    def get_subjects(self):
+        """Retourne la liste des sujets (id, nom)."""
         self.execute(
-        "SELECT id, answer_text, is_correct, explanation FROM Answers WHERE question_id = ?",
-    (question_id,)
+            "SELECT id, name FROM Subjects"
         )
         return self.fetchall()
 
+    def get_subject_id(self, text:str):
+        """Renvoie l'identifiant d'un sujet à partir de son nom, ou -1."""
+        self.execute(
+            "SELECT id FROM Subjects WHERE name = ?",
+            (text,)
+        )
+        result = self.fetchone()
+        if result is not None:
+            return result[0]
+        return -1
 
 if __name__ == "__main__":
     pass
