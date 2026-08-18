@@ -285,3 +285,75 @@ class QuizScreen(Screen):
 
 
         await zone.mount(Button("Valider", id="validate"))
+        
+        
+    async def validate_answer(self):
+
+        zone = self.query_one("#answers_zone", Container)
+
+        radio = self.query_one("#answer_choice", RadioSet)
+
+        if radio.pressed_button is None:
+            self.show_message("Veuillez choisir une réponse.")
+            return
+
+        answer_id = int(radio.pressed_button.id.replace("answer_", ""))
+
+        try:
+
+            correct = self.app.quiz.user_answer(answer_id)
+
+            answer = self.app.quiz.get_correct_answer()
+
+            if correct:
+                await zone.mount(Label("Bonne réponse !", id="good"))
+            else:
+                await zone.mount(Label("Mauvaise réponse.", id="bad"))
+
+            await zone.mount(Label(f"Explication : {answer['explanation']}"))
+
+            self.query_one("#validate").display = False
+
+            await zone.mount(Button("Question suivante", id="next_question"))
+
+        except DatabaseError as e:
+            self.show_message(e)
+            print(e)
+
+    async def next_question(self):
+
+        if self.app.quiz.next_question():
+
+            await self.display_question()
+
+        else:
+
+            await self.end_quiz()
+
+    async def end_quiz(self):
+
+        zone = self.query_one("#answers_zone", Container)
+
+        self.query_one("#menu", Button).disabled = False
+
+        await zone.remove_children()
+
+        await zone.mount(Label(f"""
+    Quiz terminé !
+
+    Score : {self.app.quiz.score}/{len(self.app.quiz.total_questions)}"""))
+
+        try:
+            current_user = self.app.session.current_user
+            current_user_id = self.app.user.get_user_id(current_user)
+            current_score = f"{self.app.quiz.score}/{len(self.app.quiz.total_questions)}"
+            self.app.game.save_game(current_user_id, current_score)
+
+            self.query_one("#sub_select").display = True
+            self.query_one("#start_game").display = True
+        except DatabaseError as e:
+            self.show_message(e)
+            print(e)
+
+    def show_message(self, message):
+        self.query_one("#message").update(str(message))
