@@ -1,1 +1,4 @@
-print("Status: OK")
+from app import QuizApp
+
+if __name__ == "__main__":
+    QuizApp().run()
