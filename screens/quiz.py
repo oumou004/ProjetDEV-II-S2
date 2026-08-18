@@ -223,6 +223,15 @@ class QuizScreen(Screen):
         yield Label("", id="message")
     
     
-    
+    async def on_button_pressed(self, event):
+        if event.button.id == "menu":
+            self.app.push_screen("menu")
+        elif event.button.id == "start_game":
+            await self.start_game()
+        elif event.button.id == "validate":
+            await self.validate_answer()
+        elif event.button.id == "next_question":
+            await self.next_question()
+
     
     
