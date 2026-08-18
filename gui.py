@@ -12,7 +12,7 @@ from classes.answer import Answer
 from views.login import LoginPage
 from views.menu import MenuPage
 from views.quiz import QuizPage
-from views.settings import SettingsPage
+from views.setting import SettingsPage
 
 
 class App(tk.Tk):
