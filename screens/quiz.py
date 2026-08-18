@@ -191,3 +191,38 @@ class QuizScreen(Screen):
     }
 
     """
+    
+    def compose(self):
+        titre = Figlet(font="standard")
+        yield Label(titre.renderText("Revision"))
+
+        yield Button(r"\[ MENU ]", id="menu")
+
+        yield Label(f"Bienvenue {self.app.session.current_user} sur la page de revision")
+
+        subjects = self.app.subject.get_subjects()
+
+
+        options = []
+
+        for row in subjects:
+            subject_id = row[0]
+            subject_name = row[1]
+            options.append((subject_name, str(subject_id)))
+
+        if not options:
+            self.show_message("Aucun sujet disponible.")
+            return
+
+        yield Select(options, id="sub_select")
+
+        yield Button(r"\[ START ]", id="start_game")
+
+        yield Container(id="answers_zone")
+
+        yield Label("", id="message")
+    
+    
+    
+    
+    
