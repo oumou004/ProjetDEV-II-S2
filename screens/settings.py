@@ -302,4 +302,58 @@ class SettingScreen(Screen):
 
         await zone.mount(Label("---------------------------------------------------------------"))
             
-            
+    async def add_quest_action(self):
+        self.show_message("")
+
+        select_subject = self.query_one("#quest_sub_select", Select)
+        select_status = self.query_one("#quest_stat_select", Select)
+
+        if not isinstance(select_subject.value, str) or not isinstance(select_status.value, str):
+            self.show_message("Veuillez d'abord sélectionner un sujet ou un statut.")
+            return
+
+
+        question_text = self.query_one("#quest_text").value.strip()
+        image = self.query_one("#quest_img").value.strip()
+
+        subject_id = int(select_subject.value)
+        status_id = int(select_status.value)
+
+
+        if not isinstance(question_text, str):
+            self.show_message("Les champ de question doit contenir une chaîne de caractères")
+            return
+
+        if question_text.strip() == "":
+            self.show_message("Le champ de question ne peut pas être vide")
+            return
+
+        try:
+            question_id = self.app.question.add_question(question_text, subject_id, status_id, image)
+            self.current_question_id = question_id
+
+            self.show_message("Question ajoutée avec succès.")
+
+            zone = self.query_one("#form_zone", Container)
+            await zone.remove_children()
+
+            await zone.mount(Label("Réponse 1"))
+            await zone.mount(Input(id="ans1"))
+            await zone.mount(Checkbox("Correcte", id="ans1_ok"))
+
+            await zone.mount(Label("Réponse 2"))
+            await zone.mount(Input(id="ans2"))
+            await zone.mount(Checkbox("Correcte", id="ans2_ok"))
+
+            await zone.mount(Label("Réponse 3"))
+            await zone.mount(Input(id="ans3"))
+            await zone.mount( Checkbox("Correcte", id="ans3_ok"))
+
+            await zone.mount(Label("Explication"))
+            await zone.mount(Input(id="explication"))
+
+            await zone.mount( Button("Enregistrer", id="save_answers"))
+
+        except DatabaseError as e:
+            self.show_message(e)
+            print(e)
