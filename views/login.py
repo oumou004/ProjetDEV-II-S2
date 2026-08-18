@@ -172,3 +172,29 @@ class LoginPage(tk.Frame):
         ).grid(row=2, column=0, columnspan=2, pady=15)    
         
         
+    def login(self):
+
+        username = self.username.get().strip()
+        passwd = self.password.get().strip()
+
+        if not re.match("^[a-zA-Z0-9]+$", username):
+            self.show_message("Le nom d'utilisateur contient des caractères non autorisés")
+            return
+
+        try:
+
+            msg = self.controller.session.login(username, passwd)
+            self.show_message(msg)
+            self.clear_form()
+
+        except (DatabaseError, ValueError, TypeError) as e:
+            self.show_message(e)
+            print(e)
+            return
+
+
+    def logout(self):
+        self.clear_form()
+        self.show_message("")
+        msg = self.controller.session.logout()
+        self.show_message(msg)
