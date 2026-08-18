@@ -1,4 +1,5 @@
 import tkinter as tk
+from tkinter import ttk
 from classes.database_manager import DatabaseError
 from classes.user import AuthenticationError, UserNotFoundError
 import re
@@ -417,4 +418,286 @@ class SettingsPage(tk.Frame):
             print(str(e))
             return
 
+    def add_question_form(self):
+        self.clear_form()
+        self.show_message("")
 
+        tk.Label(
+            self.form_frame,
+            text="Question text",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=0, column=0, padx=5, pady=5, sticky="e")
+        self.question_txt = tk.Entry(
+            self.form_frame,
+            width=30,
+            bg="#2B2B2B",
+            fg="white",
+            insertbackground="white"
+        )
+        self.question_txt.grid(row=0, column=1, padx=5, pady=5, sticky="e")
+
+
+        tk.Label(
+            self.form_frame,
+            text="Nom du sujet",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+
+        subjects = self.controller.subject.get_subjects()
+
+        self.subjects = subjects
+
+        values = [row[1] for row in subjects]
+
+        self.combo_subject = ttk.Combobox(
+            self.form_frame,
+            values=values,
+            state="readonly"
+        )
+        self.combo_subject.grid(row=1, column=1, padx=5, pady=5, sticky="e")
+
+        tk.Label(
+            self.form_frame,
+            text="Nom du statut",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=2, column=0, padx=5, pady=5, sticky="e")
+
+        status = self.controller.status.get_status()
+
+        self.status = status
+
+        values = [row[1] for row in status]
+
+        self.combo_status = ttk.Combobox(
+            self.form_frame,
+            values=values,
+            state="readonly"
+        )
+        self.combo_status.grid(row=2, column=1, padx=5, pady=5, sticky="e")
+
+        tk.Label(
+            self.form_frame,
+            text="Image path",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=3, column=0, padx=5, pady=5, sticky="e")
+        self.image_path = tk.Entry(
+            self.form_frame,
+            width=30,
+            bg="#2B2B2B",
+            fg="white",
+            insertbackground="white"
+        )
+        self.image_path.grid(row=3, column=1, padx=5, pady=5, sticky="e")
+
+        tk.Button(
+            self.form_frame,
+            text="[ Ajouter ]",
+            width=25,
+            height=2,
+            bg="#00A86B",
+            fg="white",
+            font=("Arial", 11, "bold"),
+            command=self.add_question
+        ).grid(row=4, column=0, columnspan=2, pady=15)
+
+    def add_question(self):
+
+        selected_status = self.combo_status.current()
+        selected_subject = self.combo_subject.current()
+
+        if selected_status == -1:
+            self.show_message("Sélectionnez un status.")
+            return
+
+        if selected_subject == -1:
+            self.show_message("Sélectionnez un sujet.")
+            return
+
+
+
+
+        try:
+            question_txt = self.question_txt.get().strip()
+            image_path = self.image_path.get().strip()
+
+            subject_id = self.subjects[selected_subject][0]
+            status_id = self.status[selected_status][0]
+
+
+            self.controller.question.add_question(question_txt, subject_id, status_id, image_path)
+            self.show_message("")
+            self.clear_form()
+
+
+        except DatabaseError as e:
+            self.show_message(e)
+            print(str(e))
+
+
+
+    def update_question_form(self):
+        self.clear_form()
+        self.show_message("")
+
+        tk.Label(
+            self.form_frame,
+            text="Nom du sujet",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=0, column=0, padx=5, pady=5, sticky="e")
+
+        subjects = self.controller.subject.get_subjects()
+
+        self.subjects = subjects
+
+        values_subject = [row[1] for row in subjects]
+
+        self.combo_subject = ttk.Combobox(
+            self.form_frame,
+            values=values_subject,
+            state="readonly"
+        )
+        self.combo_subject.grid(row=0, column=1, padx=5, pady=5, sticky="e")
+
+        tk.Label(
+            self.form_frame,
+            text="Nom du statut",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+
+        status = self.controller.status.get_status()
+
+        self.status = status
+
+        values_status = [row[1] for row in status]
+
+        self.combo_status = ttk.Combobox(
+            self.form_frame,
+            values=values_status,
+            state="readonly"
+        )
+        self.combo_status.grid(row=1, column=1, padx=5, pady=5, sticky="e")
+
+        tk.Button(
+            self.form_frame,
+            text="[ Afficher ]",
+            width=25,
+            height=2,
+            bg="#00A86B",
+            fg="white",
+            font=("Arial", 11, "bold"),
+            command=self.aff_question
+        ).grid(row=4, column=0, columnspan=2, pady=15)
+
+    def aff_question(self):
+
+        selected_status = self.combo_status.current()
+        selected_subject = self.combo_subject.current()
+
+        if selected_status == -1:
+            self.show_message("Sélectionnez un status.")
+            return
+
+        if selected_subject == -1:
+            self.show_message("Sélectionnez un sujet.")
+            return
+
+        try:
+            subject_id = self.subjects[selected_subject][0]
+            status_id = self.status[selected_status][0]
+
+            self.questions = self.controller.question.get_questions_sub_stat(subject_id, status_id)
+            self.show_message("")
+            self.clear_form()
+
+            tk.Label(
+                self.form_frame,
+                text="Nom de la question",
+                bg="#121212",
+                fg="white",
+                font=("Arial", 11)
+            ).grid(row=0, column=0, padx=5, pady=5, sticky="e")
+
+            questions = self.questions
+
+            values_quest = [row[1] for row in questions]
+
+            self.combo_quest = ttk.Combobox(
+                self.form_frame,
+                values=values_quest,
+                state="readonly"
+            )
+            self.combo_quest.grid(row=0, column=1, padx=5, pady=17, sticky="e")
+
+            tk.Label(
+                self.form_frame,
+                text="Nom du statut",
+                bg="#121212",
+                fg="white",
+                font=("Arial", 11)
+            ).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+
+            status = self.controller.status.get_status()
+
+            self.status = status
+
+            values_status = [row[1] for row in status]
+
+            self.combo_status = ttk.Combobox(
+                self.form_frame,
+                values=values_status,
+                state="readonly"
+            )
+            self.combo_status.grid(row=1, column=1, padx=5, pady=5, sticky="e")
+
+            tk.Button(
+                self.form_frame,
+                text="[ Valider ]",
+                width=25,
+                height=2,
+                bg="#00A86B",
+                fg="white",
+                font=("Arial", 11, "bold"),
+                command=self.update_question
+            ).grid(row=2, column=0, columnspan=2, pady=15)
+
+
+        except DatabaseError as e:
+            self.show_message(e)
+            print(str(e))
+
+    def update_question(self):
+        selected_quest = self.combo_quest.current()
+        selected_status = self.combo_status.current()
+
+        if selected_quest == -1:
+            self.show_message("Sélectionnez une question.")
+            return
+
+        if selected_status == -1:
+            self.show_message("Sélectionnez un status.")
+            return
+
+
+
+        try:
+
+            question_id = self.questions[selected_quest][0]
+            status_id = self.status[selected_status][0]
+            self.controller.question.edit_status(question_id, status_id)
+            self.clear_form()
+
+        except DatabaseError as e:
+            self.show_message(e)
+            print(str(e))
