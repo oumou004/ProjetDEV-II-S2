@@ -172,7 +172,7 @@ class SettingScreen(Screen):
         elif event.button.id == "rem_quest_sup":
             await self.rem_quest_sup()
             
-        async def add_sub(self):
+    async def add_sub(self):
         zone = self.query_one("#form_zone", Container)
 
         await zone.remove_children()
@@ -208,9 +208,57 @@ class SettingScreen(Screen):
 
             self.show_message(e)
             print(e)
-            return False        
+            return False
+        
+        
+    async def rem_sub(self):
+        zone = self.query_one("#form_zone", Container)
+        await zone.remove_children()
+
+        subjects = self.app.subject.get_subjects()
+
+        options = []
+
+        for row in subjects:
+            subject_id = row[0]
+            subject_name = row[1]
+            options.append((subject_name, str(subject_id)))
+
+        if not options:
+            self.show_message("Aucun sujet disponible.")
+            return
+
+        await zone.mount(Select(options, id="sub_select"))
+
+        await zone.mount(Button("Supprimer", id="rem_sub_action"))
+
+        await zone.mount(Label("---------------------------------------------------------------"))
+
+
+
+    async def rem_sub_action(self):
+        self.show_message("")
+
+        select = self.query_one("#sub_select", Select)
+
+        if not isinstance(select.value, str):
+            self.show_message("Veuillez d'abord sélectionner un sujet.")
+            return
+
+        subject_id = int(select.value)
+
+        try:
+
+            self.app.subject.remove_subject(subject_id)
+            self.show_message("Sujet supprimé avec succès.")
+
+            zone = self.query_one("#form_zone", Container)
+            await zone.remove_children()
+
+        except DatabaseError as e:
+            self.show_message(e)        
             
             
-            
+    
             
             
