@@ -180,3 +180,23 @@ class LoginScreen(Screen):
             self.update_status()
             print(msg)
             self.show_message(msg)
+
+    def get_credentials(self):
+        username = self.query_one("#username").value.strip()
+        password = self.query_one("#password").value.strip()
+
+        return username, password
+
+    def show_message(self, message):
+        self.query_one("#message").update(str(message))
+
+    def clear_fields(self):
+        username = self.query_one("#username")
+        passwd = self.query_one("#password")
+
+        username.value = ""
+        passwd.value = ""
+
+        username.focus()
+
+        
