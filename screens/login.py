@@ -1,7 +1,8 @@
 from textual.screen import Screen
 from textual.widgets import Label, Button, Input
-
-
+from pyfiglet import Figlet
+from classes.database_manager import DatabaseError
+from classes.user import UserNotFoundError, AuthenticationError
 
 class LoginScreen(Screen):
     CSS = """
@@ -67,3 +68,115 @@ class LoginScreen(Screen):
 
 
     """
+
+    def compose(self):
+        titre = Figlet(font="standard")
+        yield Label(titre.renderText("Connexion"))
+        yield Button(r"\[ MENU ]", id="menu")
+
+        yield Label(
+            """
+            ═══════════════════════════════
+            Utilisateur : Aucun
+            Statut      : Déconnecté
+            ═══════════════════════════════
+            """,
+            id="status")
+        yield Label("---------------------------------------------------------------")
+
+        yield Input(placeholder="Nom utilisateur", id="username")
+        yield Input(placeholder="Mot de passe", password=True, id="password")
+
+
+        yield Label("---------------------------------------------------------------")
+
+        yield Button(r"\[ Se connecter ]", id="con")
+        yield Button(r"\[ Se déconnecter ]", id="decon")
+        yield Button(r"\[ Créer un utilisateur ]",id="create")
+        yield Button(r"\[ Supprimer un utilisateur ]", id="delete")
+
+        yield Label("---------------------------------------------------------------")
+
+        yield Label("", id="message")
+
+    def on_button_pressed(self, event):
+        if event.button.id == "menu":
+
+            self.app.push_screen("menu")
+
+        elif event.button.id == "con":
+
+            username, passwd = self.get_credentials()
+
+            try:
+                msg = self.app.session.login(username, passwd)
+                self.update_status()
+                print(msg)
+                self.show_message(msg)
+                self.clear_fields()
+            except TypeError as e:
+                print(e)
+                self.show_message(f"Erreur : {e}")
+            except ValueError as e:
+                print(e)
+                self.show_message(f"Erreur : {e}")
+            except DatabaseError as e:
+                print(e)
+                self.show_message(f"Erreur : {e}")
+
+
+        elif event.button.id == "create":
+
+            username, passwd = self.get_credentials()
+
+            try:
+                self.app.user.add_user(username, passwd)
+                print("Creation réussie")
+                self.show_message("Creation réussie")
+                self.clear_fields()
+            except TypeError as e:
+                print(e)
+                self.show_message(f"Erreur : {e}")
+            except ValueError as e:
+                print(e)
+                self.show_message(f"Erreur : {e}")
+            except DatabaseError as e:
+                print(e)
+                self.show_message(f"Erreur : {e}")
+
+
+        elif event.button.id == "delete":
+
+            username, passwd = self.get_credentials()
+
+            try:
+                self.app.user.delete_user(username, passwd)
+                print("Suppression réussie")
+                self.show_message("Suppression réussie")
+                self.clear_fields()
+
+            except UserNotFoundError as e:
+                print(e)
+                self.show_message(f"Erreur : {e}")
+
+            except TypeError as e:
+                print(e)
+                self.show_message(f"Erreur : {e}")
+
+            except ValueError as e:
+                print(e)
+                self.show_message(f"Erreur : {e}")
+
+            except DatabaseError as e:
+                print(e)
+                self.show_message(f"Erreur : {e}")
+
+            except AuthenticationError as e:
+                print(e)
+                self.show_message(f"Erreur : {e}")
+
+        elif event.button.id == "decon":
+            msg = self.app.session.logout()
+            self.update_status()
+            print(msg)
+            self.show_message(msg)
