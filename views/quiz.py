@@ -247,4 +247,46 @@ class QuizPage(tk.Frame):
         else:
             self.end_quiz()
 
+    def end_quiz(self):
+        score = self.controller.quiz.scoreu
+        total = len(self.controller.quiz.total_questions)
+
+        # Supprimer le bouton "Question suivante"
+        if hasattr(self, "btn_next"):
+            self.btn_next.destroy()
+            del self.btn_next
+
+        # Réactiver les contrôles
+        self.widget_readonly(self.combo_subject)
+        self.widget_normal(self.btn_start)
+        self.widget_normal(self.btn_menu)
+
+        # Nettoyer la zone des questions
+        self.clear_form()
+
+        # Message dans la zone info
+        self.show_message(f"Quiz terminé ! Score : {score}/{total}")
+
+        # Popup du score
+        messagebox.showinfo(
+            "Quiz terminé",
+            f"Félicitations !\n\n"
+            f"Votre score : {score}/{total}"
+        )
+
+        try:
+            current_user = self.controller.session.current_user
+            current_user_id = self.controller.user.get_user_id(current_user)
+
+            current_score = f"{score}/{total}"
+
+            self.controller.game.save_game(
+                current_user_id,
+                current_score
+            )
+
+        except DatabaseError as e:
+            self.show_message(e)
+            print(e)        
+
 
