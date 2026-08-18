@@ -259,3 +259,29 @@ class QuizScreen(Screen):
         except DatabaseError as e:
             self.show_message(e)
             print(e)
+            
+    async def display_question(self):
+
+        zone = self.query_one("#answers_zone", Container)
+
+        await zone.remove_children()
+
+        question = self.app.quiz.get_current_question()
+
+        if question is None:
+            await self.end_quiz()
+            return
+
+        await zone.mount(Label(question["text"], id="question_text"))
+
+        if question["image"]:
+            await zone.mount(Label("Cette question contient une image (non affichable en terminal)."))
+
+        radio = RadioSet(id="answer_choice")
+        await zone.mount(radio)
+
+        for rep in self.app.quiz.get_current_answer():
+            await radio.mount(RadioButton(rep["text"], id=f"answer_{rep['id']}"))
+
+
+        await zone.mount(Button("Valider", id="validate"))
