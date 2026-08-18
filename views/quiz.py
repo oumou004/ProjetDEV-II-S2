@@ -2,7 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import messagebox
 from classes.database_manager import DatabaseError
-
+from PIL import Image, ImageTk
 class QuizPage(tk.Frame):
     def __init__(self, controller):
         super().__init__(controller)
@@ -117,4 +117,74 @@ class QuizPage(tk.Frame):
         except DatabaseError as e:
             self.show_message(e)
             print(str(e))
+
     
+    def display_question(self):
+        # Supprimer immédiatement tout ce qui concerne
+        # l'ancienne question
+        self.clear_form()
+
+        question = self.controller.quiz.get_current_question()
+
+        if question is None:
+            self.end_quiz()
+            return
+
+        self.current_question_id = question["id"]
+
+        # Image
+        if question["image"]:
+            image = Image.open(question["image"])
+            image = image.resize((400, 250))
+
+            self.question_image = ImageTk.PhotoImage(image)
+
+            img_label = tk.Label(
+                self.form_frame,
+                image=self.question_image,
+                bg="#121212"
+            )
+            img_label.pack(pady=10)
+
+        # Question
+        question_label = tk.Label(
+            self.form_frame,
+            text=question["text"],
+            font=("Arial", 14),
+            bg="#121212",
+            fg="white",
+            wraplength=600
+        )
+        question_label.pack(pady=10)
+
+        # Réponses
+        self.current_answers = self.controller.quiz.get_current_answer()
+
+        self.selected_answer = tk.IntVar(value=0)
+
+        for answer in self.current_answers:
+            tk.Radiobutton(
+                self.form_frame,
+                text=answer["text"],
+                variable=self.selected_answer,
+                value=answer["id"],
+                bg="#121212",
+                fg="white",
+                selectcolor="#333333",
+                activebackground="#121212",
+                activeforeground="white"
+            ).pack(pady=3)
+
+        # Bouton Valider
+        self.btn_valider = tk.Button(
+            self.form_frame,
+            text="[ Valider ]",
+            width=25,
+            height=2,
+            bg="#00A86B",
+            fg="white",
+            font=("Arial", 11, "bold"),
+            command=self.validate_answer
+        )
+        self.btn_valider.pack(pady=15)
+        
