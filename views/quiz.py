@@ -187,4 +187,64 @@ class QuizPage(tk.Frame):
             command=self.validate_answer
         )
         self.btn_valider.pack(pady=15)
-        
+
+    def validate_answer(self):
+        answer_id = self.selected_answer.get()
+
+        if answer_id == 0:
+            self.show_message("Veuillez sélectionner une réponse.")
+            return
+
+        correct = self.controller.quiz.user_answer(answer_id)
+
+        # Désactiver les réponses
+        for widget in self.form_frame.winfo_children():
+            if isinstance(widget, tk.Radiobutton):
+                widget.config(state="disabled")
+
+        if correct:
+            self.show_message("Bonne réponse !")
+        else:
+            self.show_message("Mauvaise réponse.")
+
+        # Afficher l'explication
+        for ans in self.current_answers:
+            if ans["id"] == answer_id and ans["explanation"]:
+                explain_label = tk.Label(
+                    self.form_frame,
+                    text=ans["explanation"],
+                    font=("Arial", 14),
+                    bg="#121212",
+                    fg="white",
+                    wraplength=600
+                )
+                explain_label.pack(pady=10)
+
+        # Supprimer le bouton Valider
+        self.btn_valider.destroy()
+
+        # Bouton question suivante
+        self.btn_next = tk.Button(
+            self.form_frame,
+            text="[ Question suivante ]",
+            width=25,
+            height=2,
+            bg="#00A86B",
+            fg="white",
+            font=("Arial", 11, "bold"),
+            command=self.next_question
+        )
+
+        self.btn_next.pack(pady=15)
+
+    def next_question(self):
+        # Nettoyer immédiatement l'ancienne question
+        self.clear_form()
+
+        # Passer à la question suivante
+        if self.controller.quiz.next_question():
+            self.display_question()
+        else:
+            self.end_quiz()
+
+
