@@ -119,4 +119,20 @@ class SettingScreen(Screen):
 
     """
     
-    
+    def compose(self):
+        titre = Figlet(font="standard")
+        yield Label(titre.renderText("Reglages"))
+
+        yield Button(r"\[ MENU ]", id="menu")
+        yield Label(f"Bienvenue {self.app.session.current_user} sur la page des reglages")
+
+        yield Label("---------------------------------------------------------------")
+        yield Button(r"\[ Ajouter un sujet ]", id="add_sub")
+        yield Button(r"\[ Supprimer un sujet ]", id="rem_sub")
+        yield Button(r"\[ Ajouter une question ]", id="add_quest")
+        yield Button(r"\[ Supprimer une question  ]", id="rem_quest")
+        yield Label("---------------------------------------------------------------")
+
+        yield Container(id="form_zone")
+
+        yield Label("", id="message")
