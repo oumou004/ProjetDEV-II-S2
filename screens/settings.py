@@ -259,6 +259,47 @@ class SettingScreen(Screen):
             self.show_message(e)        
             
             
-    
+    async def add_quest(self):
+        zone = self.query_one("#form_zone", Container)
+        await zone.remove_children()
+
+        status = self.app.status.get_status()
+        subjects = self.app.subject.get_subjects()
+
+        subject_options = []
+        status_options = []
+
+        for row in subjects:
+            subject_id = row[0]
+            subject_name = row[1]
+            subject_options.append((subject_name, str(subject_id)))
+
+        if not subject_options:
+            self.show_message("Aucun sujet disponible.")
+            return
+
+        for row in status:
+            status_id = row[0]
+            status_name = row[1]
+            status_options.append((status_name, str(status_id)))
+
+        if not status_options:
+            self.show_message("Aucun statut disponible.")
+            return
+
+
+        await zone.mount(Input(placeholder="Texte de la question", id="quest_text"))
+
+        await zone.mount(Label("Sujet :"))
+        await zone.mount(Select(subject_options, id="quest_sub_select"))
+
+        await zone.mount(Label("Statut :"))
+        await zone.mount(Select(status_options, id="quest_stat_select"))
+
+        await zone.mount(Input(placeholder="Image path", id="quest_img"))
+
+        await zone.mount(Button("Ajouter", id="add_quest_action"))
+
+        await zone.mount(Label("---------------------------------------------------------------"))
             
             
