@@ -198,3 +198,52 @@ class LoginPage(tk.Frame):
         self.show_message("")
         msg = self.controller.session.logout()
         self.show_message(msg)
+
+    
+    def create_user_form(self):
+        self.clear_form()
+        self.show_message("")
+
+        tk.Label(
+            self.form_frame,
+            text="Nom d'utilisateur",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=0, column=0, padx=5, pady=5, sticky="e")
+        self.username = tk.Entry(
+            self.form_frame,
+            width=30,
+            bg="#2B2B2B",
+            fg="white",
+            insertbackground="white"
+        )
+        self.username.grid(row=0, column=1, padx=5, pady=5)
+
+        tk.Label(
+            self.form_frame,
+            text="Mot de passe",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+        self.password = tk.Entry(
+            self.form_frame,
+            width=30,
+            bg="#2B2B2B",
+            fg="white",
+            insertbackground="white",
+            show="*"
+        )
+        self.password.grid(row=1, column=1, padx=5, pady=5)
+
+        tk.Button(
+            self.form_frame,
+            text="Valider",
+            width=25,
+            height=2,
+            bg="#00A86B",
+            fg="white",
+            font=("Arial", 11, "bold"),
+            command=self.create_user
+        ).grid(row=2, column=0, columnspan=2, pady=15)
