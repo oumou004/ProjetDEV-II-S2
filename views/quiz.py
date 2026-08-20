@@ -3,6 +3,8 @@ from tkinter import ttk
 from tkinter import messagebox
 from classes.database_manager import DatabaseError
 from PIL import Image, ImageTk
+
+
 class QuizPage(tk.Frame):
     def __init__(self, controller):
         super().__init__(controller)
@@ -44,34 +46,63 @@ class QuizPage(tk.Frame):
         )
         self.title.pack(pady=20)
 
-        btn_menu = tk.Button(
+        self.btn_menu = tk.Button(
             self.top_frame,
             text="[ MENU ]",
             command=lambda:
             controller.show_page("MenuPage")
         )
 
-        btn_menu.pack()
+        self.btn_menu.pack()
 
         self.info = tk.Label(
             self.bottom_frame,
-            text=""
+            text="",
+            bg="#121212",
+            fg="#00FF99",
+            font=("Arial", 11)
         )
-
         self.info.pack(pady=10)
 
-        btn_ = tk.Button(
+        tk.Label(
             self.center_frame,
-            text="[ ]",
-            command=""
+            text="Nom du sujet",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=0, column=0, padx=5, pady=5, sticky="e")
+
+        subjects = self.controller.subject.get_subjects()
+
+        self.subjects = subjects
+
+        values_subject = [row[1] for row in subjects]
+
+        self.combo_subject = ttk.Combobox(
+            self.center_frame,
+            values=values_subject,
+            state="readonly"
         )
-        btn_.pack()
+        self.combo_subject.grid(row=0, column=1, padx=5, pady=5, sticky="e")
+
+        self.btn_start = tk.Button(
+            self.center_frame,
+            text="[ Start ]",
+            width=25,
+            height=2,
+            bg="#00A86B",
+            fg="white",
+            font=("Arial", 11, "bold"),
+            command=self.start_game
+        )
+        self.btn_start.grid(row=1, column=0, columnspan=2, pady=15)
+
+
 
     def show_message(self, message):
         self.info.config(
             text=str(message)
         )
-
 
     def clear_form(self):
         for widget in self.form_frame.winfo_children():
@@ -118,7 +149,6 @@ class QuizPage(tk.Frame):
             self.show_message(e)
             print(str(e))
 
-    
     def display_question(self):
         # Supprimer immédiatement tout ce qui concerne
         # l'ancienne question
@@ -287,6 +317,4 @@ class QuizPage(tk.Frame):
 
         except DatabaseError as e:
             self.show_message(e)
-            print(e)        
-
-
+            print(e)
