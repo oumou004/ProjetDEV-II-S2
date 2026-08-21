@@ -45,6 +45,14 @@ class Quiz:
 
         shuffle(self._quiz)
 
+    def reset_quiz(self):
+        """Réinitialise l'état du quiz sans modifier les données en base."""
+        self._quiz.clear()
+        self._current_question = 0
+        self._score = 0
+        self._current_answers.clear()
+        self._finished = False
+
     @staticmethod
     def prepare_question(table:list , data:list):
         """Convertit des tuples SQL en dictionnaires de question et les ajoute.

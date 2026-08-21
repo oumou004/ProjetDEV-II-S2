@@ -130,10 +130,13 @@ class App(tk.Tk):
                     current_font = tkfont.Font(font=widget.cget("font"))
                     font_size = current_font.cget("size")
                     font_weight = current_font.cget("weight")
-                    widget.configure(
-                        fg="#00ff66",
-                        font=("Consolas", max(11, font_size), font_weight)
-                    )
+                    current_color = str(widget.cget("fg")).lower()
+                    label_options = {
+                        "font": ("Consolas", max(11, font_size), font_weight)
+                    }
+                    if current_color not in ("#ff4d4d", "#ff0000", "red"):
+                        label_options["fg"] = "#00ff66"
+                    widget.configure(**label_options)
                 elif widget_class == "Radiobutton":
                     widget.configure(
                         fg="#00ff66",
