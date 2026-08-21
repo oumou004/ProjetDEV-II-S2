@@ -2,26 +2,26 @@ import tkinter as tk
 
 class MenuPage(tk.Frame):
     def __init__(self, controller):
-        super().__init__(controller)
+        super().__init__(controller, bg="#050805")
 
         self.controller = controller
 
         # Zone 1
-        self.top_frame = tk.Frame(self)
+        self.top_frame = tk.Frame(self,  bg="#050805")
         self.top_frame.pack(
             fill="both",
             expand=True
         )
 
         # Zone 2
-        self.center_frame = tk.Frame(self)
+        self.center_frame = tk.Frame(self,  bg="#050805")
         self.center_frame.pack(
             fill="both",
             expand=True
         )
 
         # Zone 3
-        self.bottom_frame = tk.Frame(self)
+        self.bottom_frame = tk.Frame(self,  bg="#050805")
         self.bottom_frame.pack(
             fill="both",
             expand=True
@@ -31,7 +31,9 @@ class MenuPage(tk.Frame):
         self.title = tk.Label(
             self.top_frame,
             text="Bienvenue sur Feu Vert",
-            font=("Arial", 20)
+            bg="#050805",
+            fg="#00ff66",
+            font=("Consolas", 22, "bold")
         )
 
         self.title.pack(pady=20)
@@ -39,6 +41,13 @@ class MenuPage(tk.Frame):
         btn_revision = tk.Button(
             self.center_frame,
             text="[ RÉVISION ]",
+            width=25,
+            height=2,
+            bg="#062b18",
+            fg="#00ff66",
+            activebackground="#00ff66",
+            activeforeground="#050805",
+            font=("Consolas", 11, "bold"),
             command=lambda:
             controller.show_page("QuizPage")
         )
@@ -48,6 +57,13 @@ class MenuPage(tk.Frame):
         btn_settings = tk.Button(
             self.center_frame,
             text="[ RÉGLAGES ]",
+            width=25,
+            height=2,
+            bg="#062b18",
+            fg="#00ff66",
+            activebackground="#00ff66",
+            activeforeground="#050805",
+            font=("Consolas", 11, "bold"),
             command=lambda:
             controller.show_page("SettingsPage")
         )
@@ -57,6 +73,13 @@ class MenuPage(tk.Frame):
         btn_login = tk.Button(
             self.center_frame,
             text="[ CONNEXION ]",
+            width=25,
+            height=2,
+            bg="#062b18",
+            fg="#00ff66",
+            activebackground="#00ff66",
+            activeforeground="#050805",
+            font=("Consolas", 11, "bold"),
             command=lambda:
             controller.show_page("LoginPage")
         )
@@ -65,7 +88,10 @@ class MenuPage(tk.Frame):
 
         self.info = tk.Label(
             self.bottom_frame,
-            text=""
+            text="",
+            bg="#050805",
+            fg="#00ff66",
+            font=("Consolas", 11)
         )
 
         self.info.pack(pady=10)

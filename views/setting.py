@@ -51,26 +51,24 @@ class SettingsPage(tk.Frame):
 
         self.title = tk.Label(
             self.top_frame,
-            text="Bienvenue sur Feu Vert\nReglages",
+            text="Bienvenue sur Feu Vert - Réglages",
             font=("Arial", 22, "bold"),
             bg="#121212",
             fg="white"
         )
-        self.title.grid(row=0, column=0, padx=5, pady=5, sticky="e")
+        self.title.pack(pady=20)
 
 
         btn_menu = tk.Button(
             self.top_frame,
             text="[ MENU ]",
-            width=25,
-            height=2,
             bg="#00A86B",
             fg="white",
             font=("Arial", 11, "bold"),
             command=lambda:
             controller.show_page("MenuPage")
         )
-        btn_menu.grid(row=0, column=1, columnspan=2, pady=15)
+        btn_menu.pack(pady=5)
 
 
         self.info = tk.Label(
@@ -1049,12 +1047,190 @@ class SettingsPage(tk.Frame):
 
 
     def add_answer_form(self):
-        pass
+        self.clear_form()
+        self.show_message("")
 
+        self.subjects = self.controller.subject.get_subjects()
+        self.status = self.controller.status.get_status()
 
+        if not self.subjects:
+            self.show_message("Aucun sujet disponible.")
+            return
+
+        if not self.status:
+            self.show_message("Aucun statut disponible.")
+            return
+
+        tk.Label(
+            self.form_frame,
+            text="Nom du sujet",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=0, column=0, padx=5, pady=5, sticky="e")
+
+        self.combo_answer_subject = ttk.Combobox(
+            self.form_frame,
+            values=[row[1] for row in self.subjects],
+            state="readonly",
+            width=30
+        )
+        self.combo_answer_subject.grid(row=0, column=1, padx=5, pady=5, sticky="e")
+
+        tk.Label(
+            self.form_frame,
+            text="Nom du statut",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+
+        self.combo_answer_status = ttk.Combobox(
+            self.form_frame,
+            values=[row[1] for row in self.status],
+            state="readonly",
+            width=30
+        )
+        self.combo_answer_status.grid(row=1, column=1, padx=5, pady=5, sticky="e")
+
+        tk.Button(
+            self.form_frame,
+            text="[ Afficher les questions ]",
+            width=25,
+            height=2,
+            bg="#00A86B",
+            fg="white",
+            font=("Arial", 11, "bold"),
+            command=self.aff_quest_answer
+        ).grid(row=2, column=0, columnspan=2, pady=15)
 
     def aff_quest_answer(self):
-        pass
+        selected_subject = self.combo_answer_subject.current()
+        selected_status = self.combo_answer_status.current()
+
+        if selected_subject == -1:
+            self.show_message("Sélectionnez un sujet.")
+            return
+
+        if selected_status == -1:
+            self.show_message("Sélectionnez un statut.")
+            return
+
+        subject_id = self.subjects[selected_subject][0]
+        status_id = self.status[selected_status][0]
+        self.questions = self.controller.question.get_questions_sub_stat(
+            subject_id,
+            status_id
+        )
+
+        if not self.questions:
+            self.show_message("Aucune question pour ce sujet et ce statut.")
+            return
+
+        self.clear_form()
+
+        tk.Label(
+            self.form_frame,
+            text="Choisissez une question",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=0, column=0, padx=5, pady=5, sticky="e")
+
+        self.combo_question = ttk.Combobox(
+            self.form_frame,
+            values=[row[1] for row in self.questions],
+            state="readonly",
+            width=30
+        )
+        self.combo_question.grid(row=0, column=1, padx=5, pady=5, sticky="e")
+
+        tk.Label(
+            self.form_frame,
+            text="Texte de la réponse",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+
+        self.answer_text = tk.Entry(
+            self.form_frame,
+            width=30,
+            bg="#2B2B2B",
+            fg="white",
+            insertbackground="white"
+        )
+        self.answer_text.grid(row=1, column=1, padx=5, pady=5, sticky="e")
+
+        self.answer_correct = tk.BooleanVar(value=False)
+        tk.Checkbutton(
+            self.form_frame,
+            text="Réponse correcte",
+            variable=self.answer_correct,
+            bg="#121212",
+            fg="white",
+            selectcolor="#333333",
+            activebackground="#121212",
+            activeforeground="white",
+            font=("Arial", 11)
+        ).grid(row=2, column=0, columnspan=2, pady=5)
+
+        tk.Label(
+            self.form_frame,
+            text="Explication (facultative)",
+            bg="#121212",
+            fg="white",
+            font=("Arial", 11)
+        ).grid(row=3, column=0, padx=5, pady=5, sticky="e")
+
+        self.answer_explanation = tk.Entry(
+            self.form_frame,
+            width=30,
+            bg="#2B2B2B",
+            fg="white",
+            insertbackground="white"
+        )
+        self.answer_explanation.grid(row=3, column=1, padx=5, pady=5, sticky="e")
+
+        tk.Button(
+            self.form_frame,
+            text="[ Ajouter la réponse ]",
+            width=25,
+            height=2,
+            bg="#00A86B",
+            fg="white",
+            font=("Arial", 11, "bold"),
+            command=self.add_answer
+        ).grid(row=4, column=0, columnspan=2, pady=15)
+
+
 
     def add_answer(self):
-        pass
+        selected_question = self.combo_question.current()
+        answer_text = self.answer_text.get().strip()
+        explanation = self.answer_explanation.get().strip()
+
+        if selected_question == -1:
+            self.show_message("Sélectionnez une question.")
+            return
+
+        if not answer_text:
+            self.show_message("Le texte de la réponse ne peut pas être vide.")
+            return
+
+        question_id = self.questions[selected_question][0]
+        is_correct = self.answer_correct.get()
+
+        try:
+            self.controller.answer.add_answer(
+                question_id,
+                answer_text,
+                is_correct,
+                explanation if is_correct else ""
+            )
+            self.show_message("Réponse ajoutée avec succès.")
+            self.clear_form()
+
+        except DatabaseError as e:
+            self.show_message(e)
+            print(str(e))
