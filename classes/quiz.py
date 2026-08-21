@@ -1,5 +1,6 @@
 from classes.answer import Answer
 from classes.question import Question
+from classes.database_manager import DatabaseError
 from random import sample, shuffle
 
 class Quiz:
@@ -39,11 +40,16 @@ class Quiz:
         self.prepare_question(q_en_cours, self._question.get_questions_sub_stat(subject_id, 2))
         self.prepare_question(q_acquise, self._question.get_questions_sub_stat(subject_id, 3))
 
-        self._quiz.extend(sample(q_fragile, 7))
-        self._quiz.extend(sample(q_en_cours, 5))
-        self._quiz.extend(sample(q_acquise, 3))
+        self._quiz.extend(sample(q_fragile, min(len(q_fragile), 7)))
+        self._quiz.extend(sample(q_en_cours, min(len(q_en_cours), 5)))
+        self._quiz.extend(sample(q_acquise, min(len(q_acquise), 3)))
 
         shuffle(self._quiz)
+
+        if not self._quiz:
+            raise DatabaseError(
+                "Aucune question disponible pour ce sujet. Ajoutez des questions avant de lancer un quiz."
+            )
 
     @staticmethod
     def prepare_question(table:list , data:list):
