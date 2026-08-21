@@ -2,7 +2,7 @@ from classes.answer import Answer
 from classes.question import Question
 from classes.database_manager import DatabaseError
 from random import sample, shuffle
-
+from collections import deque
 class Quiz:
     """Représente un quiz composé de questions et réponses.
 
@@ -10,7 +10,11 @@ class Quiz:
     """
     def __init__(self):
         self._quiz = []
-        self._current_question = 0
+        self._queue = deque()      # file d'attente de travail : les questions ratées y sont replacées
+        self._current = None       # question actuellement affichée
+        self._mastered_ids = set() # id des questions déjà réussies au moins une fois  
+        self._wrong_counts = {}    # id de question -> nombre de mauvaises réponses données
+
         self._score = 0
         self._current_answers = []
         self._finished = False
@@ -27,7 +31,10 @@ class Quiz:
             subject_id (int): Identifiant du sujet pour lequel générer le quiz.
         """
         self._quiz.clear()
-        self._current_question = 0
+        self._queue.clear()        
+        self._current = None
+        self._mastered_ids.clear()
+        self._wrong_counts.clear()                
         self._score = 0
         self._current_answers.clear()
         self._finished = False
@@ -51,10 +58,18 @@ class Quiz:
                 "Aucune question disponible pour ce sujet. Ajoutez des questions avant de lancer un quiz."
             )
 
+ 
+        # self._quiz reste la liste figée (sert de référence pour le total).
+        # self._queue est la file de travail : on y pioche, et on y remet
+        # les questions ratées pour qu'elles reviennent plus tard.
+        self._queue = deque(self._quiz)
+        self._current = self._queue.popleft()
+
+    
     def reset_quiz(self):
         """Réinitialise l'état du quiz sans modifier les données en base."""
         self._quiz.clear()
-        self._current_question = 0
+        self._current = None
         self._score = 0
         self._current_answers.clear()
         self._finished = False
@@ -79,27 +94,43 @@ class Quiz:
 
     def get_current_question(self):
         """Renvoie la question courante du quiz ou `None` si terminé."""
-
-        if self._current_question >= len(self._quiz):
-            return None
-
-        return self._quiz[self._current_question]
+        return self._current
     
 
     def next_question(self):
         """Passe à la question suivante.
 
-        Retourne `True` si la navigation a réussi, `False` si le quiz est terminé.
+        Si la question courante n'a pas encore été réussie, elle est remise
+        dans la file d'attente pour revenir plus tard : plus elle a été
+        ratée de fois, plus elle revient vite (et donc plus souvent).
+        Le quiz ne se termine que lorsque toutes les questions distinctes
+        ont été réussies au moins une fois.
+ 
+        Retourne `True` si une nouvelle question a été chargée, `False` si
+        le quiz est terminé.
         """
         if self._finished:
             return False
-
-        self._current_question += 1
-
-        if self._current_question >= len(self._quiz):
+ 
+        if self._current is not None and self._current["id"] not in self._mastered_ids:
+            question_id = self._current["id"]
+            wrong = self._wrong_counts.get(question_id, 1)
+ 
+            # Plus il y a eu d'erreurs sur cette question, plus l'écart
+            # avant qu'elle ne revienne est petit (donc elle revient plus souvent).
+            gap = max(1, 4 - min(wrong, 3))
+            insert_index = min(gap, len(self._queue))
+ 
+            self._queue.insert(insert_index, self._current)
+ 
+        if not self._queue:
             self._finished = True
+            self._current = None
             return False
+ 
+        self._current = self._queue.popleft()
         return True
+        
     
     def get_current_answer(self):
         """Récupère les réponses associées à la question courante.
@@ -145,9 +176,18 @@ class Quiz:
             bool: True si la réponse est correcte, False sinon.
         """
         value = self.get_correct_answer()
+        question_id = self._current["id"] if self._current else None   
+
         if value is not None and answer == value["id"]:
-            self._score += 1
+            if question_id is not None and question_id not in self._mastered_ids:   
+
+                self._mastered_ids.add(question_id)                   
+                self._score += 1
             return True
+
+        if question_id is not None:
+            self._wrong_counts[question_id] = self._wrong_counts.get(question_id, 0) + 1
+
         return False
 
     @property
