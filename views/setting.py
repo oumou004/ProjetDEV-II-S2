@@ -1,7 +1,6 @@
 import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
-from tkinter import messagebox
 from pathlib import Path
 from classes.database_manager import DatabaseError
 from classes.user import AuthenticationError, UserNotFoundError
@@ -745,7 +744,7 @@ class SettingsPage(tk.Frame):
         project_dir = Path(__file__).resolve().parent.parent
         images_dir = project_dir / "images"
 
-        messagebox.showinfo(
+        self.controller.show_terminal_info(
             "Choisir une image",
             "Le quiz recherche les images uniquement dans le dossier "
             "images du projet.\n\n"

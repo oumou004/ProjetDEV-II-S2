@@ -1,6 +1,5 @@
 import tkinter as tk
 from tkinter import ttk
-from tkinter import messagebox
 from classes.database_manager import DatabaseError
 from PIL import Image, ImageTk
 
@@ -300,7 +299,7 @@ class QuizPage(tk.Frame):
             self.end_quiz()
 
     def finish_quiz(self):
-        should_finish = messagebox.askyesno(
+        should_finish = self.controller.ask_terminal_yes_no(
             "Terminer le quiz",
             "Voulez-vous vraiment terminer le quiz maintenant ?"
         )
@@ -330,7 +329,7 @@ class QuizPage(tk.Frame):
         self.show_message(f"Quiz terminé ! Score : {score}/{total}")
 
         # Popup du score
-        messagebox.showinfo(
+        self.controller.show_terminal_info(
             "Quiz terminé",
             f"Félicitations !\n\n"
             f"Votre score : {score}/{total}"

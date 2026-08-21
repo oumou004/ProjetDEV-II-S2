@@ -74,6 +74,73 @@ class App(tk.Tk):
     def _refresh_terminal_theme(self, _event=None):
         self.after_idle(self.apply_terminal_theme)
 
+    def _terminal_dialog(self, title, message, buttons):
+        dialog = tk.Toplevel(self)
+        dialog.title(title)
+        dialog.configure(bg="#050805")
+        dialog.resizable(False, False)
+        dialog.transient(self)
+        dialog.grab_set()
+
+        tk.Label(
+            dialog,
+            text=message,
+            bg="#050805",
+            fg="#00ff66",
+            font=("Consolas", 11),
+            justify="left",
+            wraplength=430,
+            padx=24,
+            pady=20
+        ).pack()
+
+        button_frame = tk.Frame(dialog, bg="#050805")
+        button_frame.pack(pady=(0, 18))
+
+        result = {"value": None}
+
+        def close(value):
+            result["value"] = value
+            dialog.destroy()
+
+        for label, value in buttons:
+            tk.Button(
+                button_frame,
+                text=label,
+                command=lambda selected=value: close(selected),
+                bg="#062b18",
+                fg="#00ff66",
+                activebackground="#00ff66",
+                activeforeground="#050805",
+                font=("Consolas", 11, "bold"),
+                relief="raised",
+                bd=2,
+                padx=14,
+                pady=6,
+                highlightthickness=1,
+                highlightbackground="#00ff66",
+                cursor="hand2"
+            ).pack(side="left", padx=6)
+
+        dialog.protocol("WM_DELETE_WINDOW", lambda: close(False))
+        dialog.update_idletasks()
+        dialog.geometry(
+            f"+{self.winfo_rootx() + (self.winfo_width() - dialog.winfo_width()) // 2}"
+            f"+{self.winfo_rooty() + (self.winfo_height() - dialog.winfo_height()) // 2}"
+        )
+        self.wait_window(dialog)
+        return result["value"]
+
+    def show_terminal_info(self, title, message):
+        self._terminal_dialog(title, message, [("[ OK ]", True)])
+
+    def ask_terminal_yes_no(self, title, message):
+        return bool(self._terminal_dialog(
+            title,
+            message,
+            [("[ Oui ]", True), ("[ Non ]", False)]
+        ))
+
     def apply_terminal_theme(self):
         def style_widget(widget):
             widget_class = widget.winfo_class()
