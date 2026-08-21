@@ -280,7 +280,7 @@ class QuizPage(tk.Frame):
             self.end_quiz()
 
     def end_quiz(self):
-        score = self.controller.quiz.scoreu
+        score = self.controller.quiz.score
         total = len(self.controller.quiz.total_questions)
 
         # Supprimer le bouton "Question suivante"
