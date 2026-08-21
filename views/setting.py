@@ -12,15 +12,50 @@ class SettingsPage(tk.Frame):
 
         self.controller = controller
 
+        self.scroll_canvas = tk.Canvas(
+            self,
+            bg="#121212",
+            highlightthickness=0
+        )
+        self.scrollbar = ttk.Scrollbar(
+            self,
+            orient="vertical",
+            command=self.scroll_canvas.yview
+        )
+        self.scroll_canvas.configure(yscrollcommand=self.scrollbar.set)
+        self.scrollbar.pack(side="right", fill="y")
+        self.scroll_canvas.pack(side="left", fill="both", expand=True)
+
+        self.scroll_frame = tk.Frame(self.scroll_canvas, bg="#121212")
+        self.scroll_window = self.scroll_canvas.create_window(
+            (0, 0),
+            window=self.scroll_frame,
+            anchor="nw"
+        )
+        self.scroll_frame.bind(
+            "<Configure>",
+            lambda _event: self.scroll_canvas.configure(
+                scrollregion=self.scroll_canvas.bbox("all")
+            )
+        )
+        self.scroll_canvas.bind(
+            "<Configure>",
+            lambda event: self.scroll_canvas.itemconfigure(
+                self.scroll_window,
+                width=event.width
+            )
+        )
+        self.scroll_canvas.bind_all("<MouseWheel>", self._scroll_with_mouse)
+
         # Zone 1
-        self.top_frame = tk.Frame(self, bg="#121212")
+        self.top_frame = tk.Frame(self.scroll_frame, bg="#121212")
         self.top_frame.pack(
             fill="x",
             pady=20
         )
 
         # Zone 2
-        self.middle_frame = tk.Frame(self, bg="#121212")
+        self.middle_frame = tk.Frame(self.scroll_frame, bg="#121212")
         self.middle_frame.pack(expand=True, fill="both")
 
         # Zone 2 à droite
@@ -44,7 +79,7 @@ class SettingsPage(tk.Frame):
         )
 
         # Zone 3
-        self.bottom_frame = tk.Frame(self, bg="#121212")
+        self.bottom_frame = tk.Frame(self.scroll_frame, bg="#121212")
         self.bottom_frame.pack(
             side="bottom",
             pady=20
@@ -173,7 +208,6 @@ class SettingsPage(tk.Frame):
         )
         btn_add_question.pack()
 
-
         btn_upddate_question = tk.Button(
             self.center_frame,
             width=25,
@@ -210,6 +244,13 @@ class SettingsPage(tk.Frame):
             command=self.add_answer_form
         )
         btn_add_question.pack()
+
+    def _scroll_with_mouse(self, event):
+        if self.winfo_ismapped():
+            self.scroll_canvas.yview_scroll(
+                -1 * (event.delta // 120),
+                "units"
+            )
 
 
     def show_message(self, message):

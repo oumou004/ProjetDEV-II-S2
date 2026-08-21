@@ -10,29 +10,64 @@ class QuizPage(tk.Frame):
 
         self.controller = controller
 
+        self.page_canvas = tk.Canvas(
+            self,
+            bg="#121212",
+            highlightthickness=0
+        )
+        self.page_scrollbar = ttk.Scrollbar(
+            self,
+            orient="vertical",
+            command=self.page_canvas.yview
+        )
+        self.page_canvas.configure(yscrollcommand=self.page_scrollbar.set)
+        self.page_scrollbar.pack(side="right", fill="y")
+        self.page_canvas.pack(side="left", fill="both", expand=True)
+
+        self.page_frame = tk.Frame(self.page_canvas, bg="#121212")
+        self.page_window = self.page_canvas.create_window(
+            (0, 0),
+            window=self.page_frame,
+            anchor="nw"
+        )
+        self.page_frame.bind(
+            "<Configure>",
+            lambda _event: self._refresh_page_scroll()
+        )
+        self.page_canvas.bind(
+            "<Configure>",
+            self._resize_page_frame
+        )
+        self.page_canvas.bind("<Enter>", self._enable_page_scroll)
+        self.page_canvas.bind("<Leave>", self._disable_page_scroll)
+
         # Zone 1
-        self.top_frame = tk.Frame(self,  bg="#121212")
+        self.top_frame = tk.Frame(self.page_frame,  bg="#121212")
         self.top_frame.pack(
             fill="both",
             expand=True
         )
 
         # Zone 2
-        self.center_frame = tk.Frame(self,  bg="#121212")
+        self.center_frame = tk.Frame(self.page_frame,  bg="#121212")
         self.center_frame.pack(
             fill="both",
             expand=True
         )
 
         # Zone 3
-        self.form_frame = tk.Frame(self,  bg="#121212")
+        self.form_frame = tk.Frame(self.page_frame, bg="#121212")
         self.form_frame.pack(
             fill="both",
             expand=True
         )
+        self.form_frame.bind(
+            "<Configure>",
+            lambda _event: self._refresh_page_scroll()
+        )
 
         # Zone 4
-        self.bottom_frame = tk.Frame(self, bg="#121212")
+        self.bottom_frame = tk.Frame(self.page_frame, bg="#121212")
         self.bottom_frame.pack(
             fill="both",
             expand=True
@@ -106,6 +141,36 @@ class QuizPage(tk.Frame):
         )
         self.btn_start.grid(row=1, column=0, columnspan=2, pady=15)
 
+    def _enable_page_scroll(self, _event=None):
+        self.page_canvas.bind_all("<MouseWheel>", self._scroll_page)
+
+    def _resize_page_frame(self, event):
+        self._refresh_page_scroll(event.width, event.height)
+
+    def _refresh_page_scroll(self, canvas_width=None, canvas_height=None):
+        self.update_idletasks()
+        if canvas_width is None:
+            canvas_width = self.page_canvas.winfo_width()
+        if canvas_height is None:
+            canvas_height = self.page_canvas.winfo_height()
+
+        content_height = self.page_frame.winfo_reqheight()
+        visible_height = max(canvas_height, content_height)
+        self.page_canvas.itemconfigure(
+            self.page_window,
+            width=canvas_width,
+            height=visible_height
+        )
+        self.page_canvas.configure(
+            scrollregion=(0, 0, canvas_width, visible_height)
+        )
+
+    def _disable_page_scroll(self, _event=None):
+        self.page_canvas.unbind_all("<MouseWheel>")
+
+    def _scroll_page(self, event):
+        self.page_canvas.yview_scroll(-1 * (event.delta // 120), "units")
+
 
 
     def show_message(self, message):
@@ -127,6 +192,7 @@ class QuizPage(tk.Frame):
     def clear_form(self):
         for widget in self.form_frame.winfo_children():
             widget.destroy()
+        self.after_idle(self._refresh_page_scroll)
 
     def widget_dislable(self, widget):
         widget.config(state="disabled")
@@ -238,6 +304,7 @@ class QuizPage(tk.Frame):
             command=self.validate_answer
         )
         self.btn_valider.pack(pady=15)
+        self.after_idle(self._refresh_page_scroll)
 
     def validate_answer(self):
         answer_id = self.selected_answer.get()

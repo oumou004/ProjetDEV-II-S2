@@ -254,3 +254,4 @@ if __name__ == "__main__":
     app = App()
     app.show_page("MenuPage")
     app.mainloop()
+
