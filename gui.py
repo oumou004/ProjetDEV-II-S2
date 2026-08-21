@@ -69,10 +69,9 @@ class App(tk.Tk):
 
         self.create_pages()
         self.apply_terminal_theme()
-        self.bind_all("<ButtonRelease-1>", self._refresh_terminal_theme)
 
     def _refresh_terminal_theme(self, _event=None):
-        self.after_idle(self.apply_terminal_theme)
+        pass
 
     def _terminal_dialog(self, title, message, buttons):
         dialog = tk.Toplevel(self)
@@ -146,10 +145,7 @@ class App(tk.Tk):
             widget_class = widget.winfo_class()
 
             if widget_class == "Button":
-                button_text = str(widget.cget("text")).replace("\n", " ")
                 widget.configure(
-                    width=max(10, min(42, len(button_text) + 4)),
-                    height=1,
                     bg="#062b18",
                     fg="#00ff66",
                     activebackground="#00ff66",
@@ -158,8 +154,8 @@ class App(tk.Tk):
                     relief="raised",
                     overrelief="ridge",
                     bd=2,
-                    padx=14,
-                    pady=7,
+                    padx=12,
+                    pady=6,
                     highlightthickness=1,
                     highlightbackground="#00ff66",
                     highlightcolor="#b7ffcb",
@@ -168,7 +164,7 @@ class App(tk.Tk):
                 if widget.winfo_manager() == "pack":
                     widget.pack_configure(pady=5)
                 elif widget.winfo_manager() == "grid":
-                    widget.grid_configure(pady=8)
+                    widget.grid_configure(pady=6)
             elif widget_class == "Entry":
                 widget.configure(
                     bg="#07140b",
