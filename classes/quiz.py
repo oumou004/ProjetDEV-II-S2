@@ -46,10 +46,20 @@ class Quiz:
 
         shuffle(self._quiz)
 
+<<<<<<< HEAD
         if not self._quiz:
             raise DatabaseError(
                 "Aucune question disponible pour ce sujet. Ajoutez des questions avant de lancer un quiz."
             )
+=======
+    def reset_quiz(self):
+        """Réinitialise l'état du quiz sans modifier les données en base."""
+        self._quiz.clear()
+        self._current_question = 0
+        self._score = 0
+        self._current_answers.clear()
+        self._finished = False
+>>>>>>> 8fc1760cb83974bb2b91332c42e55843f80a7169
 
     @staticmethod
     def prepare_question(table:list , data:list):

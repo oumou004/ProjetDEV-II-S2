@@ -57,6 +57,14 @@ class QuizPage(tk.Frame):
 
         self.btn_menu.pack()
 
+        self.btn_end = tk.Button(
+            self.top_frame,
+            text="[ Terminer le quiz ]",
+            state="disabled",
+            command=self.finish_quiz
+        )
+        self.btn_end.pack(pady=5)
+
         self.info = tk.Label(
             self.bottom_frame,
             text="",
@@ -102,9 +110,20 @@ class QuizPage(tk.Frame):
 
 
     def show_message(self, message):
-        self.info.config(
-            text=str(message)
+        message_text = str(message)
+        error_words = (
+            "mauvaise",
+            "erreur",
+            "sélectionnez",
+            "veuillez",
+            "aucun",
+            "vide",
+            "introuvable"
         )
+        color = "#ff4d4d" if any(
+            word in message_text.lower() for word in error_words
+        ) else "#00ff66"
+        self.info.config(text=message_text, fg=color)
 
     def clear_form(self):
         for widget in self.form_frame.winfo_children():
@@ -140,6 +159,7 @@ class QuizPage(tk.Frame):
         self.widget_dislable(self.combo_subject)
         self.widget_dislable(self.btn_start)
         self.widget_dislable(self.btn_menu)
+        self.widget_normal(self.btn_end)
 
         subject_id = self.subjects[selected][0]
 
@@ -279,6 +299,15 @@ class QuizPage(tk.Frame):
         else:
             self.end_quiz()
 
+    def finish_quiz(self):
+        should_finish = messagebox.askyesno(
+            "Terminer le quiz",
+            "Voulez-vous vraiment terminer le quiz maintenant ?"
+        )
+
+        if should_finish:
+            self.end_quiz()
+
     def end_quiz(self):
         score = self.controller.quiz.score
         total = len(self.controller.quiz.total_questions)
@@ -292,6 +321,7 @@ class QuizPage(tk.Frame):
         self.widget_readonly(self.combo_subject)
         self.widget_normal(self.btn_start)
         self.widget_normal(self.btn_menu)
+        self.widget_dislable(self.btn_end)
 
         # Nettoyer la zone des questions
         self.clear_form()
@@ -320,3 +350,5 @@ class QuizPage(tk.Frame):
         except DatabaseError as e:
             self.show_message(e)
             print(e)
+
+        self.controller.quiz.reset_quiz()

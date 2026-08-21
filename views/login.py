@@ -113,9 +113,19 @@ class LoginPage(tk.Frame):
         btn_add_user.pack(pady=5)
         
     def show_message(self, message):
-        self.info.config(
-            text=str(message)
+        message_text = str(message)
+        error_words = (
+            "erreur",
+            "non autorisés",
+            "incorrect",
+            "introuvable",
+            "échec",
+            "vide"
         )
+        color = "#ff4d4d" if any(
+            word in message_text.lower() for word in error_words
+        ) else "#00ff66"
+        self.info.config(text=message_text, fg=color)
 
 
     def clear_form(self):
