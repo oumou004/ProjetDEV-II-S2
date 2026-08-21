@@ -1,5 +1,8 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
+from tkinter import messagebox
+from pathlib import Path
 from classes.database_manager import DatabaseError
 from classes.user import AuthenticationError, UserNotFoundError
 
@@ -720,6 +723,15 @@ class SettingsPage(tk.Frame):
 
         tk.Button(
             self.form_frame,
+            text="[ Parcourir ]",
+            bg="#00A86B",
+            fg="white",
+            font=("Arial", 11, "bold"),
+            command=self.choose_image
+        ).grid(row=3, column=2, padx=8, pady=5)
+
+        tk.Button(
+            self.form_frame,
             text="[ Ajouter ]",
             width=25,
             height=2,
@@ -728,6 +740,39 @@ class SettingsPage(tk.Frame):
             font=("Arial", 11, "bold"),
             command=self.add_question
         ).grid(row=4, column=0, columnspan=2, pady=15)
+
+    def choose_image(self):
+        project_dir = Path(__file__).resolve().parent.parent
+        images_dir = project_dir / "images"
+
+        messagebox.showinfo(
+            "Choisir une image",
+            "Le quiz recherche les images uniquement dans le dossier "
+            "images du projet.\n\n"
+            "Placez d'abord votre image dans ce dossier, puis sélectionnez-la."
+        )
+
+        selected_path = filedialog.askopenfilename(
+            title="Choisir une image",
+            initialdir=images_dir if images_dir.exists() else project_dir,
+            filetypes=(
+                ("Images", "*.png *.jpg *.jpeg *.gif *.bmp"),
+                ("Tous les fichiers", "*.*")
+            )
+        )
+
+        if not selected_path:
+            return
+
+        selected = Path(selected_path)
+        try:
+            relative_path = selected.relative_to(project_dir)
+            path_to_save = relative_path.as_posix()
+        except ValueError:
+            path_to_save = selected.as_posix()
+
+        self.image_path.delete(0, tk.END)
+        self.image_path.insert(0, path_to_save)
 
     def add_question(self):
 
@@ -1156,35 +1201,40 @@ class SettingsPage(tk.Frame):
         )
         self.combo_question.grid(row=0, column=1, padx=5, pady=5, sticky="e")
 
-        tk.Label(
-            self.form_frame,
-            text="Texte de la réponse",
-            bg="#121212",
-            fg="white",
-            font=("Arial", 11)
-        ).grid(row=1, column=0, padx=5, pady=5, sticky="e")
+        self.answer_entries = []
+        self.correct_answer = tk.IntVar(value=0)
 
-        self.answer_text = tk.Entry(
-            self.form_frame,
-            width=30,
-            bg="#2B2B2B",
-            fg="white",
-            insertbackground="white"
-        )
-        self.answer_text.grid(row=1, column=1, padx=5, pady=5, sticky="e")
+        for answer_number in range(1, 4):
+            tk.Label(
+                self.form_frame,
+                text=f"Réponse {answer_number}",
+                bg="#121212",
+                fg="white",
+                font=("Arial", 11)
+            ).grid(row=answer_number, column=0, padx=5, pady=5, sticky="e")
 
-        self.answer_correct = tk.BooleanVar(value=False)
-        tk.Checkbutton(
-            self.form_frame,
-            text="Réponse correcte",
-            variable=self.answer_correct,
-            bg="#121212",
-            fg="white",
-            selectcolor="#333333",
-            activebackground="#121212",
-            activeforeground="white",
-            font=("Arial", 11)
-        ).grid(row=2, column=0, columnspan=2, pady=5)
+            answer_entry = tk.Entry(
+                self.form_frame,
+                width=30,
+                bg="#2B2B2B",
+                fg="white",
+                insertbackground="white"
+            )
+            answer_entry.grid(row=answer_number, column=1, padx=5, pady=5, sticky="e")
+            self.answer_entries.append(answer_entry)
+
+            tk.Radiobutton(
+                self.form_frame,
+                text="Bonne réponse",
+                variable=self.correct_answer,
+                value=answer_number,
+                bg="#121212",
+                fg="white",
+                selectcolor="#333333",
+                activebackground="#121212",
+                activeforeground="white",
+                font=("Arial", 10)
+            ).grid(row=answer_number, column=2, padx=5, pady=5)
 
         tk.Label(
             self.form_frame,
@@ -1192,7 +1242,7 @@ class SettingsPage(tk.Frame):
             bg="#121212",
             fg="white",
             font=("Arial", 11)
-        ).grid(row=3, column=0, padx=5, pady=5, sticky="e")
+        ).grid(row=4, column=0, padx=5, pady=5, sticky="e")
 
         self.answer_explanation = tk.Entry(
             self.form_frame,
@@ -1201,7 +1251,7 @@ class SettingsPage(tk.Frame):
             fg="white",
             insertbackground="white"
         )
-        self.answer_explanation.grid(row=3, column=1, padx=5, pady=5, sticky="e")
+        self.answer_explanation.grid(row=4, column=1, padx=5, pady=5, sticky="e")
 
         tk.Button(
             self.form_frame,
@@ -1212,34 +1262,41 @@ class SettingsPage(tk.Frame):
             fg="white",
             font=("Arial", 11, "bold"),
             command=self.add_answer
-        ).grid(row=4, column=0, columnspan=2, pady=15)
+        ).grid(row=5, column=0, columnspan=3, pady=15)
 
 
 
     def add_answer(self):
         selected_question = self.combo_question.current()
-        answer_text = self.answer_text.get().strip()
+        answer_texts = [entry.get().strip() for entry in self.answer_entries]
         explanation = self.answer_explanation.get().strip()
 
         if selected_question == -1:
             self.show_message("Sélectionnez une question.")
             return
 
-        if not answer_text:
-            self.show_message("Le texte de la réponse ne peut pas être vide.")
+        if any(not answer_text for answer_text in answer_texts):
+            self.show_message("Les trois propositions doivent être remplies.")
             return
 
         question_id = self.questions[selected_question][0]
-        is_correct = self.answer_correct.get()
+        correct_answer = self.correct_answer.get()
+        if correct_answer not in (1, 2, 3):
+            self.show_message("Sélectionnez une seule réponse correcte.")
+            return
+
+        answers = [
+            (answer_text, index == correct_answer)
+            for index, answer_text in enumerate(answer_texts, start=1)
+        ]
 
         try:
-            self.controller.answer.add_answer(
+            self.controller.answer.add_answers(
                 question_id,
-                answer_text,
-                is_correct,
-                explanation if is_correct else ""
+                answers,
+                explanation
             )
-            self.show_message("Réponse ajoutée avec succès.")
+            self.show_message("Les trois réponses ont été ajoutées avec succès.")
             self.clear_form()
 
         except DatabaseError as e:

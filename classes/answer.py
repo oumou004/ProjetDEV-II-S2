@@ -26,6 +26,28 @@ class Answer(DatabaseManager):
     (question_id, text, is_correct, explanation)
         )
 
+    @transactional
+    def add_answers(self, question_id: int, answers: list, explanation: str = ""):
+        """Ajoute trois propositions avec une seule bonne réponse."""
+        self.execute(
+            "SELECT 1 FROM Answers WHERE question_id = ? AND is_correct = 1 LIMIT 1",
+            (question_id,)
+        )
+        if self.fetchone() is not None:
+            raise DatabaseError("Cette question possède déjà une réponse correcte.")
+
+        if len(answers) != 3 or sum(is_correct for _, is_correct in answers) != 1:
+            raise DatabaseError(
+                "Il faut exactement trois propositions et une seule réponse correcte."
+            )
+
+        for text, is_correct in answers:
+            self.execute(
+                "INSERT INTO Answers (question_id, answer_text, is_correct, explanation) "
+                "VALUES (?, ?, ?, ?)",
+                (question_id, text, int(is_correct), explanation if is_correct else "")
+            )
+
 
 
     @transactional
